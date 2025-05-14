@@ -2,6 +2,7 @@ import express from "express";
 import {
   createApplication,
   getAllApplications,
+  getAllApplicationsindex,
   getMyApplications,
   updateApplicationStatus,
 } from "../Controllers/Applications.controllers.js";
@@ -18,6 +19,7 @@ router.post(
 );
 
 router.get("/", authenticateToken(["employer"]), getAllApplications);
+router.get("/index", authenticateToken(["employer"]), getAllApplicationsindex);
 router.get("/me", authenticateToken(["jobseeker"]), getMyApplications);
 router.put("/:id", authenticateToken(["employer"]), updateApplicationStatus);
 

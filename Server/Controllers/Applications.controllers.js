@@ -32,6 +32,56 @@ export const getAllApplications = async (req, res) => {
   }
 };
 
+// models/Job.js
+
+export const getAllApplicationsindex = async (req, res) => {
+  try {
+    const applications = await Application.find().populate("jobId userId");
+    const jobs = await Job.find();
+    const monthlyJobPostings = jobs.reduce((acc, job) => {
+      const month = new Date(job.createdAt).toLocaleString("default", {
+        month: "short",
+      });
+      if (!acc[month]) acc[month] = 0;
+      acc[month]++;
+      return acc;
+    }, {});
+
+    // Jobs by Category
+    const categoryData = jobs.reduce((acc, job) => {
+      if (!acc[job.category]) acc[job.category] = 0;
+      acc[job.category]++;
+      return acc;
+    }, {});
+
+    // Calculate Active Jobs
+    const activeJobs = jobs.filter((job) => job.isActive).length; // assuming 'isActive' field
+
+    // Calculate Applications by Status
+    const totalApplications = applications.length;
+    const pendingReview = applications.filter(
+      (app) => app.status === "pending"
+    ).length;
+    const hired = applications.filter(
+      (app) => app.status === "accepted"
+    ).length;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        monthlyJobPostings, // { Jan: 4, Feb: 6, ... }
+        categoryData, // { Development: 35%, Design: 25%, ... }
+        activeJobs,
+        totalApplications,
+        pendingReview,
+        hired,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const getMyApplications = async (req, res) => {
   try {
     const apps = await Application.find({ userId: req.user.id }).populate(

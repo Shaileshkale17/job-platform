@@ -5,7 +5,6 @@ import { useStore } from "../store";
 
 function Home() {
   const isDarkMode = useStore((state) => state.isDarkMode);
-
   return (
     <div className={`${isDarkMode ? "text-white" : "text-gray-900"}`}>
       <div className="text-center mb-16">
