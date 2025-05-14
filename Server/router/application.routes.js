@@ -3,6 +3,7 @@ import {
   createApplication,
   getAllApplications,
   getAllApplicationsindex,
+  getApplicationActivity,
   getMyApplications,
   updateApplicationStatus,
 } from "../Controllers/Applications.controllers.js";
@@ -21,6 +22,11 @@ router.post(
 router.get("/", authenticateToken(["employer"]), getAllApplications);
 router.get("/index", authenticateToken(["employer"]), getAllApplicationsindex);
 router.get("/me", authenticateToken(["jobseeker"]), getMyApplications);
+router.get(
+  "/activity",
+  authenticateToken(["jobseeker"]),
+  getApplicationActivity
+);
 router.put("/:id", authenticateToken(["employer"]), updateApplicationStatus);
 
 export default router;

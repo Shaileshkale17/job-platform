@@ -1,6 +1,6 @@
 import Application from "../model/Applications.model.js";
 import Job from "../model/Job.model.js";
-
+import moment from "moment";
 export const createApplication = async (req, res) => {
   try {
     const { jobId, coverLetter, resume } = req.body;
@@ -32,8 +32,6 @@ export const getAllApplications = async (req, res) => {
   }
 };
 
-// models/Job.js
-
 export const getAllApplicationsindex = async (req, res) => {
   try {
     const applications = await Application.find().populate("jobId userId");
@@ -54,10 +52,8 @@ export const getAllApplicationsindex = async (req, res) => {
       return acc;
     }, {});
 
-    // Calculate Active Jobs
-    const activeJobs = jobs.filter((job) => job.isActive).length; // assuming 'isActive' field
+    const activeJobs = jobs.filter((job) => job.isActive).length;
 
-    // Calculate Applications by Status
     const totalApplications = applications.length;
     const pendingReview = applications.filter(
       (app) => app.status === "pending"
@@ -69,8 +65,8 @@ export const getAllApplicationsindex = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        monthlyJobPostings, // { Jan: 4, Feb: 6, ... }
-        categoryData, // { Development: 35%, Design: 25%, ... }
+        monthlyJobPostings,
+        categoryData,
         activeJobs,
         totalApplications,
         pendingReview,
@@ -88,6 +84,35 @@ export const getMyApplications = async (req, res) => {
       "jobId"
     );
     res.status(200).json({ success: true, data: apps });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getApplicationActivity = async (req, res) => {
+  try {
+    const sixWeeksAgo = moment().subtract(5, "weeks").startOf("week").toDate();
+
+    const apps = await Application.find({
+      userId: req.user.id,
+      createdAt: { $gte: sixWeeksAgo },
+    });
+
+    const activity = Array.from({ length: 6 }, (_, i) => ({
+      week: `Week ${i + 1}`,
+      applications: 0,
+    }));
+
+    apps.forEach((app) => {
+      const weekIndex = Math.floor(
+        moment(app.createdAt).diff(sixWeeksAgo, "days") / 7
+      );
+      if (weekIndex >= 0 && weekIndex < 6) {
+        activity[weekIndex].applications += 1;
+      }
+    });
+
+    res.status(200).json({ success: true, data: activity });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
