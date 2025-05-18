@@ -3,46 +3,46 @@ import Application from "../model/Applications.model.js";
 import Job from "../model/Job.model.js";
 
 export const createApplication = async (req, res) => {
-  // try {
-  const { jobId, coverLetter } = req.body;
+  try {
+    const { jobId, coverLetter } = req.body;
 
-  const job = await Job.findById(jobId);
-  if (!job) {
-    return res.status(404).json({ message: "Job not found." });
-  }
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: "Job not found." });
+    }
 
-  let resumeUrl = "";
+    let resumeUrl = "";
 
-  if (req.file) {
-    const uploaded = await cloudinary.uploader.upload_stream(
-      {
-        resource_type: "raw", // for PDFs, DOCs, etc.
-        folder: "resumes",
-        public_id: `${req.user.id}_${Date.now()}`,
-      },
-      async (error, result) => {
-        if (error) {
-          return res.status(500).json({ message: "Upload failed", error });
+    if (req.file) {
+      const uploaded = await cloudinary.uploader.upload_stream(
+        {
+          resource_type: "raw", // for PDFs, DOCs, etc.
+          folder: "resumes",
+          public_id: `${req.user.id}_${Date.now()}`,
+        },
+        async (error, result) => {
+          if (error) {
+            return res.status(500).json({ message: "Upload failed", error });
+          }
+
+          const application = await Application.create({
+            jobId,
+            userId: req.user.id,
+            coverLetter,
+            resume: result.secure_url,
+          });
+
+          return res.status(201).json({ success: true, data: application });
         }
+      );
 
-        const application = await Application.create({
-          jobId,
-          userId: req.user.id,
-          coverLetter,
-          resume: result.secure_url,
-        });
-
-        return res.status(201).json({ success: true, data: application });
-      }
-    );
-
-    uploaded.end(req.file.buffer); // send file buffer to Cloudinary
-  } else {
-    return res.status(400).json({ message: "Resume file is required." });
+      uploaded.end(req.file.buffer); // send file buffer to Cloudinary
+    } else {
+      return res.status(400).json({ message: "Resume file is required." });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
-  // } catch (error) {
-  //   res.status(500).json({ success: false, message: error.message });
-  // }
 };
 
 export const getAllApplications = async (req, res) => {
