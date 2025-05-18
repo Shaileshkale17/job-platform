@@ -10,6 +10,7 @@ import JobSeekerDashboard from "./pages/JobSeekerDashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
+import JobPost from "./pages/JobPost";
 
 function App() {
   const isDarkMode = useStore((state) => state.isDarkMode);
@@ -34,6 +35,7 @@ function App() {
                 path="/employer/dashboard"
                 element={<EmployerDashboard />}
               />
+              <Route path="/employer/job-post" element={<JobPost />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={["jobseeker"]} />}>

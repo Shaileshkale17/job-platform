@@ -32,6 +32,15 @@ function Navbar() {
                 logout
               </button>
             )}
+            {currentUser?.role && (
+              <Link
+                to="/employer/job-post"
+                className={`${
+                  isDarkMode ? "text-gray-300" : "text-gray-700"
+                } hover:text-blue-600`}>
+                job Post
+              </Link>
+            )}
             <Link
               to="/jobs"
               className={`${

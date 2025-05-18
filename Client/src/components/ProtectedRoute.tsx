@@ -18,6 +18,10 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
     }
   }, [currentUser, setCurrentUser]);
 
+  if (currentUser === undefined) {
+    return null;
+  }
+  console.log("currentUser", currentUser);
   if (!currentUser) {
     return <Navigate to="/login" replace />;
   }
